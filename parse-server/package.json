@@ -1,0 +1,13 @@
+{
+  "scripts": {
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.6",
+    "express": "^5.2.1",
+    "papaparse": "^5.3.2",
+    "parse": "^8.5.0",
+    "parse-dashboard": "^9.0.0",
+    "parse-server": "^9.5.0"
+  }
+}
