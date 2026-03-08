@@ -17,7 +17,8 @@ const parseServer = new ParseServer({
   databaseURI: "mongodb://127.0.0.1:27017/parseDB",
   appId: APP_ID,
   masterKey: MASTER_KEY,
-  serverURL: SERVER_URL
+  serverURL: SERVER_URL,
+  allowClientClassCreation: true
 });
 
 // Initialize Dashboard
