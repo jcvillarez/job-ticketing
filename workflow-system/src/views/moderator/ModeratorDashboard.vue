@@ -211,7 +211,7 @@ export default {
   },
   mounted: async function () {
     try {
-      const PendingAdminAccount = new Parse.Object.extend(
+      const PendingAdminAccount = Parse.Object.extend(
         "PendingAdminAccount"
       );
       const userQuery = new Parse.Query(PendingAdminAccount);

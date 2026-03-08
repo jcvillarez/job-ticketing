@@ -399,7 +399,7 @@ export default {
   },
   mounted: async function () {
     try {
-      const Workflow_Initiation_History = new Parse.Object.extend(
+      const Workflow_Initiation_History = Parse.Object.extend(
         "Workflow_Initiation_History"
       );
       const currentUser = Parse.User.current();

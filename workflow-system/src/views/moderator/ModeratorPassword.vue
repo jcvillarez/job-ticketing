@@ -59,7 +59,7 @@ export default {
         );
 
         if (verifyPassword) {
-          const PendingAdminAccount = new Parse.Object.extend(
+          const PendingAdminAccount = Parse.Object.extend(
             "PendingAdminAccount"
           );
           const query = new Parse.Query(PendingAdminAccount);

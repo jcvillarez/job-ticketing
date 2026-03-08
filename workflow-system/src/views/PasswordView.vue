@@ -63,7 +63,7 @@ export default {
         );
 
         if (verifyPassword) {
-          const Workflow_Initiation_History = new Parse.Object.extend(
+          const Workflow_Initiation_History = Parse.Object.extend(
             "Workflow_Initiation_History"
           );
           const query = new Parse.Query(Workflow_Initiation_History);

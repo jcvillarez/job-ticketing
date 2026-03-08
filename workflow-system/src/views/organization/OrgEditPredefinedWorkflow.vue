@@ -139,7 +139,7 @@ export default {
           }
           Promise.all(userFile.map((file) => file.save()))
             .then(async (savedFiles) => {
-              const Workflow = new Parse.Object.extend(
+              const Workflow = Parse.Object.extend(
                 "Org_Workflow_Initiation_History"
               );
               const workflow = new Workflow();

@@ -167,7 +167,7 @@ export default {
         }
         Promise.all(userFile.map((file) => file.save())).then(
           async (savedFiles) => {
-            const userAccount = new Parse.Object.extend("PendingAdminAccount");
+            const userAccount = Parse.Object.extend("PendingAdminAccount");
 
             const useraccount = new userAccount();
 

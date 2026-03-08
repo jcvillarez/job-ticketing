@@ -141,7 +141,7 @@ export default {
       } catch (error) {
         alert(error);
       }
-      const orgProfile = new Parse.Object.extend("OrgProfile");
+      const orgProfile = Parse.Object.extend("OrgProfile");
       const profile = new orgProfile();
 
       profile.set("orgName", this.orgName);

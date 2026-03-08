@@ -176,7 +176,7 @@ export default {
               template.set("userInitiated", currentUser);
               template.set("processName", this.processName);
               template.save().then(() => {
-                const Workflow = new Parse.Object.extend(
+                const Workflow = Parse.Object.extend(
                   "Org_Workflow_Initiation_History"
                 );
                 const workflow = new Workflow();

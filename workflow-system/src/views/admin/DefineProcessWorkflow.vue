@@ -126,7 +126,7 @@ export default {
         }
 
         const currentUser = Parse.User.current();
-        const workflowTemplate = new Parse.Object.extend("PredefinedWorkflow");
+        const workflowTemplate = Parse.Object.extend("PredefinedWorkflow");
         const query = new Parse.Query(workflowTemplate);
 
         // Add a filter to check if the process name already exists

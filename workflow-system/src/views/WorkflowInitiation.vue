@@ -137,7 +137,7 @@ export default {
               template
                 .save()
                 .then(() => {
-                  const Workflow = new Parse.Object.extend(
+                  const Workflow = Parse.Object.extend(
                     "Workflow_Initiation_History"
                   );
                   const workflow = new Workflow();

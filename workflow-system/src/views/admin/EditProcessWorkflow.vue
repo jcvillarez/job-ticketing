@@ -134,7 +134,7 @@ export default {
         const count = await adminQuery.count();
         const orgName = Parse.User.current().get("orgName");
         adminQuery.equalTo("orgName", orgName);
-        const workflowTemplate = new Parse.Object.extend("PredefinedWorkflow");
+        const workflowTemplate = Parse.Object.extend("PredefinedWorkflow");
         const templateId = this.$route.query.templateId;
         const template = new workflowTemplate();
         for (let i = 0; i < count; i++) {
