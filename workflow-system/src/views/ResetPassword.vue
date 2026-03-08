@@ -90,7 +90,7 @@ export default {
         });
 
         alert("Password reset successfully");
-        this.$router.push("/login");
+        this.$router.push({ name: "LoginView" });
       } catch (error) {
         console.log(error.message);
       }

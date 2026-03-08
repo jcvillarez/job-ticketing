@@ -127,7 +127,6 @@ export default {
       const useraccount = new Parse.User();
       useraccount.set("username", this.username);
       useraccount.set("password", this.password);
-      useraccount.set("confirm_password", this.confirm_password);
       useraccount.set("name", this.name);
       useraccount.set("address", this.address);
       useraccount.set("contact", this.contact);

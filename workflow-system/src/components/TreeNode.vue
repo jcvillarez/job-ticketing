@@ -1,41 +1,50 @@
 <style>
 .indv-treestructure-body {
   @apply bg-[url('@/assets/background-images/user.jpg')] bg-cover bg-fixed bg-no-repeat flex flex-col items-center justify-center font-['Inter'] h-[100vh] min-w-[800px];
-} /* lock */
+}
+
+/* lock */
 .indv-treestructure-content {
   @apply flex flex-col items-center justify-start gap-[30px] grow w-full max-w-[1280px] py-[30px];
-} /* lock */
+}
 
-.indv-treestructure-content > span {
+/* lock */
+
+.indv-treestructure-content>span {
   @apply font-black text-[35px] text-left w-full px-[5px];
-} /* lock */
+}
 
-.indv-treestructure-content > form > button {
+/* lock */
+
+.indv-treestructure-content>form>button {
   @apply border-[1px] border-[#F18642] bg-[#F18642] text-white text-[13px] p-[10px] w-[150px];
 }
-.indv-treestructure-content > form > button:hover {
+
+.indv-treestructure-content>form>button:hover {
   @apply border-[#F18642] bg-transparent text-[#F18642] duration-75;
 }
 
 .indv-treestructure-frame {
   @apply overflow-auto w-full h-[1px] grow border-[1px] border-b-[#aaa] p-[30px];
 }
-.indv-treestructure-frame > ul {
+
+.indv-treestructure-frame>ul {
   @apply inline-block;
 }
 
-.indv-treestructure-frame > table {
+.indv-treestructure-frame>table {
   @apply w-full;
 }
 
-.indv-treestructure-frame > table > tbody > tr {
+.indv-treestructure-frame>table>tbody>tr {
   @apply border-b-[1px] border-b-[#aaa];
 }
 
-.indv-treestructure-frame > table > thead > tr > th {
+.indv-treestructure-frame>table>thead>tr>th {
   @apply text-[13px] p-[10px] font-bold sticky top-0 bg-white border-none;
 }
-.indv-treestructure-frame > table > tbody > tr > td {
+
+.indv-treestructure-frame>table>tbody>tr>td {
   @apply text-left text-[13px] border-none p-[10px];
 }
 </style>
@@ -104,12 +113,10 @@ export default {
               const approved = "Approved";
               const reject = "Reject";
               const revise = "Revise";
-              const file = entry.get("userFile").map((obj) => {
-                return {
-                  name: obj.name().substring(obj.name().indexOf("_") + 1),
-                  url: obj.url(),
-                };
-              });
+              const files = (entry.get("userFile") || []).map((obj) => ({
+                name: obj.name().substring(obj.name().indexOf("_") + 1),
+                url: obj.url(), // real URL from Parse Server
+              }));
 
               Parse.Cloud.run("sendUserEmail", {
                 id: id,
@@ -119,7 +126,7 @@ export default {
                 approver: approver,
                 message: message,
                 date: date,
-                file: file,
+                file: files,
                 approved: approved,
                 reject: reject,
                 revise: revise,
@@ -146,91 +153,93 @@ export default {
       return button;
     },
     initializeList(parent) {
-      let button = this.createButton("Add Broadcast Approver");
-      let buttonHolder = document.createElement("li");
-      buttonHolder.classList = `
-        border-[5px] border-[#F18642]/20 p-[30px]
-      `;
-      buttonHolder.appendChild(button);
-      button.onclick = () => {
-        let container = document.createElement("div");
+      // Initial "Add Broadcast Approver" button
+      const buttonHolder = document.createElement("li");
+      buttonHolder.classList = "border-[5px] border-[#F18642]/20 p-[30px]";
+
+      const addButton = this.createButton("Add Broadcast Approver");
+      buttonHolder.appendChild(addButton);
+      parent.appendChild(buttonHolder);
+
+      addButton.onclick = () => {
+        // Container for user input
+        const container = document.createElement("div");
         container.classList =
           "flex flex-row gap-5 items-center justify-center border-[5px] border-[#F18642]/20 p-[30px]";
 
-        let input = document.createElement("input");
+        const input = document.createElement("input");
         input.setAttribute("type", "email");
         input.setAttribute("placeholder", "Email Address");
-        input.classList =
-          "border-[1px] border-[#aaa] text-[13px] p-[10px] w-[200px];";
+        input.classList = "border-[1px] border-[#aaa] text-[13px] p-[10px] w-[200px];";
 
-        let roleInput = document.createElement("select");
-        roleInput.classList =
-          "border-[1px] border-[#aaa] text-[13px] p-[10px] w-[200px];";
-
-        // Create an option for each role
+        const roleInput = document.createElement("select");
+        roleInput.classList = "border-[1px] border-[#aaa] text-[13px] p-[10px] w-[200px];";
         ["Viewer", "Approver", "Acknowledger", "Endorser"].forEach((role) => {
-          let option = document.createElement("option");
+          const option = document.createElement("option");
           option.value = role;
           option.text = role;
           roleInput.appendChild(option);
         });
 
-        let submit = this.createButton("OK", async () => {
-          let userRole = Parse.User.current().get("role");
-          const userQuery = new Parse.Query("_User");
-          userQuery.equalTo("username", input.value);
-          const result = await userQuery.first();
-          // Check if the input is a valid email address
-          let emailPattern = /^\S+@\S+\.\S+$/;
-          if (userRole == "orgUser") {
-            alert("User does not belong to this organization.");
-            return;
-          } else if (!emailPattern.test(input.value)) {
+        const submit = this.createButton("OK", async () => {
+          const email = input.value.trim();
+          const role = roleInput.value;
+
+          // Validate email format
+          const emailPattern = /^\S+@\S+\.\S+$/;
+          if (!emailPattern.test(email)) {
             alert("Please enter a valid email address");
-            return;
-          } else if (!result) {
-            alert("User does not exist");
             return;
           }
 
-          let role = roleInput.value;
-          let item = document.createElement("li");
+          // Call cloud function for a single email
+          let user;
+          try {
+            user = await Parse.Cloud.run("checkUserByEmail", { email });
+          } catch (err) {
+            alert(err.message || "User does not exist");
+            return;
+          }
+
+          // Create new list item for this approver
+          const item = document.createElement("li");
           item.classList = "flex flex-row gap-3 items-center justify-end";
+          item.setAttribute("data-email", user.email);
+          item.setAttribute("data-role", role);
+          item.innerText = `${user.email} (${role})`;
 
-          let nestedList = document.createElement("ul");
-          nestedList.classList =
-            "border-[5px] border-[#F18642] p-[30px] mb-[30px]";
+          // Nested sequential approvers container
+          const nestedList = document.createElement("ul");
+          nestedList.classList = "border-[5px] border-[#F18642] p-[30px] mb-[30px]";
 
-          let addChildButton = this.createButton("Add Sequential Approver");
-          addChildButton.classList = `
-            border-[1px] border-[#F18642] bg-[#F18642] text-white text-[13px] p-[10px]
-            hover:border-[#F18642] hover:bg-transparent hover:text-[#F18642] hover:duration-75
-          `;
+          // Add child button
+          const addChildButton = this.createButton("Add Sequential Approver");
+          addChildButton.classList =
+            "border-[1px] border-[#F18642] bg-[#F18642] text-white text-[13px] p-[10px] hover:border-[#F18642] hover:bg-transparent hover:text-[#F18642] hover:duration-75";
           addChildButton.onclick = () => {
             this.initializeList(nestedList);
-            nestedList.setAttribute("data-parent", input.value);
+            nestedList.setAttribute("data-parent", user.email);
             item.removeChild(addChildButton);
           };
-          let deleteButton = this.createButton("Delete", () => {
+
+          // Delete button
+          const deleteButton = this.createButton("Delete", () => {
             parent.removeChild(item);
             parent.removeChild(nestedList);
           });
-          deleteButton.classList = `
-            border-[1px] border-[#F18642] bg-[#F18642] text-white text-[13px] p-[10px]
-            hover:border-[#F18642] hover:bg-transparent hover:text-[#F18642] hover:duration-75
-          `;
+          deleteButton.classList =
+            "border-[1px] border-[#F18642] bg-[#F18642] text-white text-[13px] p-[10px] hover:border-[#F18642] hover:bg-transparent hover:text-[#F18642] hover:duration-75";
 
-          item.setAttribute("data-email", input.value);
-          item.setAttribute("data-role", role); // Set the data-role attribute to the selected value
-          item.innerText = `${input.value} (${role})`; // Display the role beside the email
           item.appendChild(deleteButton);
           item.appendChild(addChildButton);
 
+          // Insert items into parent
           parent.insertBefore(item, container);
           parent.replaceChild(buttonHolder, container);
           parent.insertBefore(nestedList, item.nextSibling);
         });
-        let cancel = this.createButton("Cancel", () => {
+
+        const cancel = this.createButton("Cancel", () => {
           parent.replaceChild(buttonHolder, container);
         });
 
@@ -238,11 +247,10 @@ export default {
         container.appendChild(roleInput);
         container.appendChild(submit);
         container.appendChild(cancel);
+
         parent.replaceChild(container, buttonHolder);
       };
-
-      parent.appendChild(buttonHolder);
-    },
+    }
   },
   mounted: function () {
     this.initializeList(this.$refs.treeContainer);

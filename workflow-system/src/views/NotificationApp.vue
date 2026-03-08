@@ -3,6 +3,7 @@ button,
 .back-button {
   @apply border-[1px] border-[#F18642] bg-[#F18642] text-white text-[13px] p-[10px] w-[100px];
 }
+
 button:hover {
   @apply border-[#F18642] bg-transparent text-[#F18642] duration-75;
 }
@@ -14,19 +15,24 @@ button:hover {
 .approval-frame {
   @apply mx-auto w-[400px];
 }
+
 .info {
   @apply border-[1px] border-[#aaa] p-[10px];
 }
+
 .decide {
   @apply flex flex-row mx-auto w-[400px] mb-[5px] border-[1px] border-[#aaa] p-[10px];
 }
-.decide > .buttons-frame-info {
+
+.decide>.buttons-frame-info {
   @apply flex flex-row grow gap-3 items-center justify-start;
 }
-.decide > .buttons-frame-button {
+
+.decide>.buttons-frame-button {
   @apply flex flex-row grow gap-3 items-center justify-end;
 }
-.decide > .buttons-frame-button > a {
+
+.decide>.buttons-frame-button>a {
   @apply flex flex-row gap-3;
 }
 
@@ -59,48 +65,29 @@ a {
               <td>{{ approval.process }}</td>
               <td>{{ approval.description }}</td>
               <td v-for="file in approval.files" :key="file">
-                <a
-                  class="text-[blue] font-bold cursor-pointer"
-                  v-bind:href="file.url"
-                  target="_blank"
-                  rel="noopener"
-                  >{{ file.name }}</a
-                >
+                <a class="text-[blue] font-bold cursor-pointer" v-bind:href="file.url" target="_blank" rel="noopener">{{
+                  file.name }}</a>
               </td>
               <td class="flex flex-row gap-3 align-bottom">
-                <router-link
-                  :to="{
-                    name: 'PasswordView',
-                    query: {
-                      approvalId: approval.id,
-                      verdict: decision,
-                    },
-                  }"
-                  v-for="verdict in verdicts"
-                  :key="verdict.id"
-                >
-                  <button
-                    class="rounded-[5px]"
-                    @click.once="approverDecide(verdict, id)"
-                  >
+                <router-link :to="{
+                  name: 'PasswordView',
+                  query: {
+                    approvalId: approval.id,
+                    verdict: decision,
+                  },
+                }" v-for="verdict in verdicts" :key="verdict.id">
+                  <button class="rounded-[5px]" @click.once="approverDecide(verdict, id)">
                     {{ verdict.approve }} {{ verdict.reject }}
                   </button>
                 </router-link>
-                <router-link
-                  :to="{
-                    name: 'ReviseView',
-                    query: {
-                      approvalId: approval.id,
-                      edit: decision,
-                    },
-                  }"
-                  v-for="edit in edits"
-                  :key="edit.id"
-                >
-                  <button
-                    class="deci rounded-[5px]"
-                    @click.once="approverEdit(edit, id)"
-                  >
+                <router-link :to="{
+                  name: 'ReviseView',
+                  query: {
+                    approvalId: approval.id,
+                    edit: decision,
+                  },
+                }" v-for="edit in edits" :key="edit.id">
+                  <button class="deci rounded-[5px]" @click.once="approverEdit(edit, id)">
                     {{ edit.revise }}
                   </button>
                 </router-link>
@@ -130,7 +117,6 @@ a {
 <script>
 import NavBarComponent from "@/components/NavBarComponent.vue";
 import "/src/assets/tailwind.css"; // added
-import { HybridTree } from "@/hybrid_tree.js";
 import Parse from "parse";
 export default {
   name: "NotificationApp",
@@ -175,54 +161,19 @@ export default {
   },
   mounted: async function () {
     const currentUser = Parse.User.current();
-    if (currentUser == null) {
+    if (!currentUser) {
       alert("Please login first!");
       this.$router.push("/login");
-    } else {
-      try {
-        const email = Parse.User.current().get("username");
-        const Workflow_Initiation_History = Parse.Object.extend(
-          "Workflow_Initiation_History"
-        );
-        const approver = new Parse.Query(Workflow_Initiation_History);
-        const approverResults = await approver.find();
-
-        if (approverResults.length != 0) {
-          for (let i = 0; i < approverResults.length; i++) {
-            const files = (await approverResults[i].get("userFile")).map(
-              (item) => {
-                return {
-                  name: item.name().substring(item.name().indexOf("_") + 1),
-                  url: item.url(),
-                };
-              }
-            );
-            const user = approverResults[i].get("userInitiated");
-            await user.fetch();
-            const approvers = approverResults[i].get("approvers");
-            const tree = new HybridTree(approvers);
-
-            const status = tree.getStatus(email);
-            const role = tree.getRole(email);
-
-            if (status != "Hidden") {
-              this.approvals.unshift({
-                id: approverResults[i].id,
-                initiated: user.get("name"),
-                date: approverResults[i].createdAt.toLocaleDateString(),
-                process: approverResults[i].get("processName"),
-                description: approverResults[i].get("message"),
-                status: status,
-                roles: role,
-                files: files,
-              });
-            }
-          }
-        }
-      } catch (error) {
-        console.log(error.message);
-      }
+      return;
     }
-  },
+
+    try {
+      const approvals = await Parse.Cloud.run("getApprovalsForUser");
+      // Remove notifications where role is Viewer
+      this.approvals = approvals.filter(a => a.roles !== "Viewer");
+    } catch (error) {
+      console.error("Error fetching workflow approvals:", error);
+    }
+  }
 };
 </script>

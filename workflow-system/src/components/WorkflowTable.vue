@@ -10,7 +10,7 @@
 
 /* lock */
 
-.indv-dashboard-content > span {
+.indv-dashboard-content>span {
   @apply font-black text-[35px] text-left w-full px-[5px];
 }
 
@@ -20,27 +20,27 @@
   @apply overflow-auto w-full h-[1px] grow;
 }
 
-.indv-dashboard-table-frame > table {
+.indv-dashboard-table-frame>table {
   @apply w-full grow;
 }
 
-.indv-dashboard-table-frame > table > tbody > tr {
+.indv-dashboard-table-frame>table>tbody>tr {
   @apply border-b-[1px] border-b-[#aaa];
 }
 
-.indv-dashboard-table-frame > table > thead > tr > th {
+.indv-dashboard-table-frame>table>thead>tr>th {
   @apply text-[13px] p-[10px] font-bold sticky top-0 bg-white border-none;
 }
 
-.indv-dashboard-table-frame > table > tbody > tr > td {
+.indv-dashboard-table-frame>table>tbody>tr>td {
   @apply text-left text-[13px] border-none p-[10px];
 }
 
-.indv-dashboard-table-frame > table > tbody > tr > td > button {
+.indv-dashboard-table-frame>table>tbody>tr>td>button {
   @apply border-[1px] border-[#F18642] bg-[#F18642] text-white text-[13px] p-[10px] w-full;
 }
 
-.indv-dashboard-table-frame > table > tbody > tr > td > button:hover {
+.indv-dashboard-table-frame>table>tbody>tr>td>button:hover {
   @apply border-[#F18642] bg-transparent text-[#F18642] duration-75;
 }
 
@@ -48,14 +48,15 @@
   @apply flex flex-row items-center justify-end;
 }
 
-.bar > input {
+.bar>input {
   @apply border-[1px] border-[#aaa] p-[10px] h-full w-[500px];
 }
-.bar > select {
+
+.bar>select {
   @apply border-[1px] border-[#aaa] p-[10px] h-full w-[500px] w-[200px];
 }
 
-.bar > div {
+.bar>div {
   @apply grow;
 }
 </style>
@@ -68,12 +69,7 @@
 
       <div class="w-full">
         <div class="bar">
-          <input
-            class="search-bar"
-            type="text"
-            v-model="searchText"
-            placeholder="Search process..."
-          />
+          <input class="search-bar" type="text" v-model="searchText" placeholder="Search process..." />
           <div></div>
           <select v-model="statusFilter" class="status-filter">
             <option value="">All</option>
@@ -100,10 +96,7 @@
               <th>Action</th>
             </tr>
           </thead>
-          <tbody
-            v-for="workflowTable in filteredWorkflowTables"
-            :key="workflowTable"
-          >
+          <tbody v-for="workflowTable in filteredWorkflowTables" :key="workflowTable">
             <tr v-if="workflowTable.total">
               <td>{{ workflowTable.processName }}</td>
               <td>
@@ -115,28 +108,15 @@
                 }}
               </td>
               <td>
-                <a
-                  class="file"
-                  v-for="item in workflowTable.files"
-                  :key="item"
-                  v-bind:href="item.url"
-                  target="_blank"
-                  rel="noopener"
-                  >{{ item.name }}</a
-                >
+                <a class="file" v-for="item in workflowTable.files" :key="item" v-bind:href="item.url" target="_blank"
+                  rel="noopener">{{ item.name }}</a>
               </td>
               <td>
-                <span
-                  v-tooltip="{ content: tooltipDescription }"
-                  :title="tooltipDescription"
-                >
-                  <router-link
-                    :to="{
-                      name: 'UserProgress',
-                      query: { progressId: workflowTable.id },
-                    }"
-                    class="file"
-                  >
+                <span v-tooltip="{ content: tooltipDescription }" :title="tooltipDescription">
+                  <router-link :to="{
+                    name: 'UserProgress',
+                    query: { progressId: workflowTable.id },
+                  }" class="file">
                     {{ workflowTable.progress }}/{{ workflowTable.total }}
                   </router-link>
                 </span>
@@ -145,53 +125,32 @@
                 {{ workflowTable.status }}
               </td>
               <td v-if="workflowTable.status == 'Revise'">
-                <router-link
-                  :to="{
-                    name: 'UserComment',
-                    query: { reviseId: workflowTable.id },
-                  }"
-                  >{{ workflowTable.status }}</router-link
-                >
+                <router-link :to="{
+                  name: 'UserComment',
+                  query: { reviseId: workflowTable.id },
+                }">{{ workflowTable.status }}</router-link>
               </td>
-              <td
-                v-if="
-                  workflowTable.status != 'Approved' &&
-                  workflowTable.status != 'Revise' &&
-                  workflowTable.status != 'Reject'
-                "
-              >
-                <a
-                  class="file"
-                  href="javascript:void(0)"
-                  @click="cancelWorkflow(workflowTable.id)"
-                >
+              <td v-if="
+                workflowTable.status != 'Approved' &&
+                workflowTable.status != 'Revise' &&
+                workflowTable.status != 'Reject'
+              ">
+                <a class="file" href="javascript:void(0)" @click="cancelWorkflow(workflowTable.id)">
                   Cancel Workflow
                 </a>
               </td>
-              <td
-                v-if="
-                  workflowTable.status == 'Approved' ||
-                  workflowTable.status == 'Revise' ||
-                  workflowTable.status == 'Reject'
-                "
-              >
-                <a
-                  class="file"
-                  href="javascript:void(0)"
-                  @click="deleteWorkflow(workflowTable.id)"
-                >
+              <td v-if="
+                workflowTable.status == 'Approved' ||
+                workflowTable.status == 'Revise' ||
+                workflowTable.status == 'Reject'
+              ">
+                <a class="file" href="javascript:void(0)" @click="deleteWorkflow(workflowTable.id)">
                   Delete Workflow
                 </a>
               </td>
               <td v-if="workflowTable.status == 'Approved'">
                 <div v-for="item in workflowTable.showDocument" :key="item">
-                  <a
-                    class="file"
-                    :href="item.url"
-                    target="_blank"
-                    rel="noopener"
-                    @click.prevent="showDocument(item)"
-                  >
+                  <a class="file" :href="item.url" target="_blank" rel="noopener" @click.prevent="showDocument(item)">
                     Show Document
                   </a>
                 </div>
@@ -219,7 +178,7 @@
 import NavBarComponent from "../components/NavBarComponent";
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import "/src/assets/tailwind.css"; // added
-
+import logoUrl from "@/assets/hashflow-logo.png";
 import Parse from "parse";
 import { HybridTree } from "@/hybrid_tree.js";
 
@@ -341,37 +300,32 @@ export default {
       }
     },
     async showDocument(item) {
-      // Insert the logo into the PDF document
-      const stampedFile = await this.insertStamp(item.url, item.name);
+      try {
+        const stampedFile = await this.insertStamp(item);
 
-      // Open the stamped file in a new tab
-      const fileUrl = URL.createObjectURL(stampedFile);
-      const newTab = window.open(fileUrl, "_blank");
-      newTab.focus();
+        const fileUrl = URL.createObjectURL(stampedFile);
+        window.open(fileUrl, "_blank");
+      } catch (error) {
+        console.error(error);
+
+        // fallback: open original file
+        window.open(item.url, "_blank");
+      }
     },
-    async insertStamp(url, name) {
-      const existingPdfBytes = await fetch(url).then((res) =>
-        res.arrayBuffer()
-      );
+    async insertStamp(parseFile) {
+      // Download the PDF bytes via Parse.File.download(), which handles ACL/session
+      const existingPdfBytes = await fetch(parseFile.url()).then(res => res.arrayBuffer());
+
       const pdfDoc = await PDFDocument.load(existingPdfBytes);
-      const stampFont = await pdfDoc.embedFont(
-        StandardFonts.TimesRomanBoldItalic
-      );
+      const stampFont = await pdfDoc.embedFont(StandardFonts.TimesRomanBoldItalic);
 
-      // Fetch PNG image
-      const logoUrl =
-        "http://localhost:1337/api/files/final/dc4ed98cf7e6a9ed7dd97133c59a9bd4_hashflow-logo.png";
-      const pngImageBytes = await fetch(logoUrl).then((res) =>
-        res.arrayBuffer()
-      );
-
+      // Load local logo image (your imported logoUrl)
+      const pngImageBytes = await fetch(logoUrl).then((res) => res.arrayBuffer());
       const logoImage = await pdfDoc.embedPng(pngImageBytes);
       const logoSize = logoImage.scale(0.05);
 
       const pages = pdfDoc.getPages();
-      const length = pages.length;
-
-      for (let i = 0; i < length; i++) {
+      for (let i = 0; i < pages.length; i++) {
         pages[i].drawText(
           "*All actors in this workflow for this attachment has given their approval. A computer generated stamp from Hashflow Team",
           {
@@ -391,11 +345,10 @@ export default {
       }
 
       const stampedPdfBytes = await pdfDoc.save();
-      const stampedFile = new File([stampedPdfBytes], name, {
-        type: "application/pdf",
-      });
-      return stampedFile;
-    },
+
+      // Return as a File object so it can be opened in a new tab
+      return new File([stampedPdfBytes], parseFile.name || "document.pdf", { type: "application/pdf" });
+    }
   },
   mounted: async function () {
     try {
@@ -426,12 +379,7 @@ export default {
               url: obj.url(),
             };
           }),
-          showDocument: queryResults[i].get("userFile").map((obj) => {
-            return {
-              name: obj.name().substring(obj.name().indexOf("_") + 1),
-              url: obj.url(),
-            };
-          }),
+          showDocument: queryResults[i].get("userFile"),
           progress: progress,
           total: total,
           status: status,
